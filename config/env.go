@@ -2,22 +2,31 @@ package config
 
 import "github.com/joho/godotenv"
 
-var env map[string]string
+// Global `env` map
+var env map[string]string = initEnv()
 
+// Initialize the global `env` variable
+func initEnv() map[string]string {
+	e, err := godotenv.Read()
+	if err != nil {
+		panic(err)
+	}
+
+	return e
+}
+
+// Retrieves the whole global `env`
+// Runs `initEnv()` if needed
 func GetEnv() map[string]string {
 	if len(env) == 0 {
-		newEnv, err := godotenv.Read()
-		if err != nil {
-			panic(err)
-		}
-
-		env = newEnv
+		env = initEnv()
 	}
 
 	return env
 }
 
+// Retrieves an Env property by its name
 func GetEnvItem(item string) string {
-	curEnv := GetEnv()
-	return curEnv[item]
+	e := GetEnv()
+	return e[item]
 }
