@@ -15,3 +15,5 @@ hashed-notes
 # Dependency directories (remove the comment below to include it)
 # vendor/
  
+# Env/Configuration file
+.env
