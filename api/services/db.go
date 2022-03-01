@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/kunioshi/hashed-notes/api/models"
 	"github.com/kunioshi/hashed-notes/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -31,7 +32,14 @@ func initDb() *gorm.DB {
 		log.Fatalf("Error connecting to database. Error: %v", err)
 	}
 
+	// Register the models Auto-Migration
+	AutoMigrate(nd)
+
 	return nd
+}
+
+func AutoMigrate(db *gorm.DB) {
+	db.AutoMigrate(&models.User{})
 }
 
 // Retrieves the `database` connection
