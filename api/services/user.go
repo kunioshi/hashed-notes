@@ -4,8 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kunioshi/hashed-notes/api/models"
@@ -71,33 +69,24 @@ func GetUsers(c *gin.Context) ([]models.User, error) {
 }
 
 func GetUser(c *gin.Context) (*models.User, error) {
-	// Check for SQL Injection
-	id, err := strconv.Atoi(c.Param("id"))
+	id := c.Param("id")
+
+	u := new(models.User)
+	db := GetDB()
+	err := db.Where("id = ?", id).First(&u).Error
 	if err != nil {
-		return nil, errors.New("record not found")
-	}
-
-	var u *models.User
-
-	r := GetDB().First(&u, id)
-	if r.Error != nil {
-		return nil, r.Error
+		return nil, err
 	}
 
 	return u, nil
 }
 
 func UpdateUser(c *gin.Context) (*models.User, error) {
-	// Check for SQL Injection
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return nil, errors.New("record not found")
-	}
+	id := c.Param("id")
 
-	// Check the given ID
+	u := new(models.User)
 	db := GetDB()
-	var u *models.User
-	err = db.First(&u, id).Error
+	err := db.Where("id = ?", id).First(&u).Error
 	if err != nil {
 		return nil, err
 	}
@@ -132,15 +121,11 @@ func UpdateUser(c *gin.Context) (*models.User, error) {
 }
 
 func DeleteUser(c *gin.Context) error {
-	// Check for SQL Injection
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return errors.New("record not found")
-	}
+	id := c.Param("id")
 
 	u := new(models.User)
 	db := GetDB()
-	err = db.First(&u, id).Error
+	err := db.Where("id = ?", id).First(&u).Error
 	if err != nil {
 		return err
 	}
