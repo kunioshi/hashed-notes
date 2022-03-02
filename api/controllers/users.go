@@ -40,7 +40,7 @@ func getUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": u})
+	c.JSON(http.StatusCreated, gin.H{"user": u})
 }
 
 func updateUser(c *gin.Context) {
