@@ -118,3 +118,21 @@ func UpdateUser(c *gin.Context) (*models.User, error) {
 
 	return u, nil
 }
+
+func DeleteUser(c *gin.Context) error {
+	id := c.Param("id")
+
+	u := new(models.User)
+	db := GetDB()
+	err := db.First(&u, id).Error
+	if err != nil {
+		return err
+	}
+
+	err = db.Delete(&u).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

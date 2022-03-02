@@ -53,8 +53,12 @@ func updateUser(c *gin.Context) {
 }
 
 func deleteUser(c *gin.Context) {
-	// TODO: Implement Endpoint
-	c.JSON(http.StatusServiceUnavailable, "Users/deleteUser not yet implemented!")
+	err := services.DeleteUser(c)
+	if printError(err, c) {
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
 }
 
 // Checks whether `err` is nil and if it ISN'T, prints the JSON error
