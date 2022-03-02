@@ -38,14 +38,18 @@ func getUser(c *gin.Context) {
 	u, err := services.GetUser(c)
 	if printError(err, c) {
 		return
-}
+	}
 
 	c.JSON(http.StatusOK, gin.H{"user": u})
 }
 
 func updateUser(c *gin.Context) {
-	// TODO: Implement Endpoint
-	c.JSON(http.StatusServiceUnavailable, "Users/updateUser not yet implemented!")
+	u, err := services.UpdateUser(c)
+	if printError(err, c) {
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": u})
 }
 
 func deleteUser(c *gin.Context) {

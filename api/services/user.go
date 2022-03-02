@@ -3,15 +3,14 @@ package services
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
-	"net/http"
+	"encoding/json"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kunioshi/hashed-notes/api/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type CreateUserInput struct {
+type UserInput struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 	Email    string `json:"email" binding:"required"`
@@ -82,13 +81,40 @@ func GetUser(c *gin.Context) (*models.User, error) {
 }
 
 func UpdateUser(c *gin.Context) (*models.User, error) {
+	// Check the given ID
+	id := c.Param("id")
+	db := GetDB()
 	var u *models.User
+	err := db.First(&u, id).Error
+	if err != nil {
+		return nil, err
+	}
 
-	data, _ := c.Get("password")
-	fmt.Fprintf(c.Writer, "data: %v", data)
-	c.ShouldBindJSON(&u)
+	// Parse JSON body
+	r, _ := c.GetRawData()
+	var m map[string]interface{}
+	err = json.Unmarshal(r, &m)
+	if err != nil {
+		return nil, err
+	}
 
-	c.JSON(http.StatusOK, gin.H{"user": u})
+	// Remove empty fields
+	for k, v := range m {
+		if v == "" || v == nil {
+			delete(m, k)
+		}
+	}
+
+	// Hash the new password, if there is one
+	p, ok := m["password"]
+	if ok {
+		m["password"], _ = Bcrypt(p.(string))
+	}
+
+	q := db.Model(&u).Updates(m)
+	if q.Error != nil {
+		return nil, q.Error
+	}
 
 	return u, nil
 }
