@@ -39,31 +39,24 @@ func MD5(e string) (string, error) {
 }
 
 func CreateUser(c *gin.Context) (*models.User, error) {
-	var u CreateUserInput
+	var u models.User
 	err := c.ShouldBindJSON(&u)
 	if err != nil {
 		return nil, err
 	}
 
-	ec, err := MD5(u.Email)
+	u.Password, err = Bcrypt(u.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	hp, err := Bcrypt(u.Password)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create and Persist User
-	nu := models.NewUser(u.Username, hp, u.Email, ec)
 	db := GetDB()
 	r := db.Create(&u)
 	if r.Error != nil {
 		return nil, r.Error
 	}
 
-	return nu, nil
+	return &u, nil
 }
 
 func GetUsers(c *gin.Context) ([]models.User, error) {
