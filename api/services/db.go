@@ -40,6 +40,7 @@ func initDb() *gorm.DB {
 
 func AutoMigrate(db *gorm.DB) {
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.EmailConfirm{})
 }
 
 // Retrieves the `database` connection
