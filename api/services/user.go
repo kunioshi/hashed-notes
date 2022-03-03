@@ -29,10 +29,24 @@ func CreateUser(c *gin.Context) (*models.User, error) {
 	}
 
 	db := GetDB()
-	r := db.Create(&u)
+
+	// Start a DB transaction to make sure all entries are persisted together
+	t := db.Begin()
+	r := t.Create(&u)
 	if r.Error != nil {
 		return nil, r.Error
 	}
+	ec, err := CreateEmailConfirm(u)
+	if err != nil {
+		t.Rollback()
+		return nil, err
+	}
+	r = t.Create(&ec)
+	if r.Error != nil {
+		t.Rollback()
+		return nil, r.Error
+	}
+	t.Commit()
 
 	return &u, nil
 }
@@ -91,10 +105,28 @@ func UpdateUser(c *gin.Context) (*models.User, error) {
 		m["password"], _ = Bcrypt(p.(string))
 	}
 
-	q := db.Model(&u).Updates(m)
+	_, ok = m["email"]
+	var ec *models.EmailConfirm
+	if ok {
+		ec, err = CreateEmailConfirm(*u)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Start a DB transaction to make sure all entries are persisted together
+	t := db.Begin()
+	q := t.Model(&u).Updates(m)
 	if q.Error != nil {
+		t.Rollback()
 		return nil, q.Error
 	}
+	q = t.Create(&ec)
+	if q.Error != nil {
+		t.Rollback()
+		return nil, q.Error
+	}
+	t.Commit()
 
 	return u, nil
 }
