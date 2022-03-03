@@ -1,8 +1,6 @@
 package services
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
 
 	"github.com/gin-gonic/gin"
@@ -10,31 +8,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserInput struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	Email    string `json:"email" binding:"required"`
-}
-
 // Generate a Bcrypt hash from the given `string`
 func Bcrypt(p string) (string, error) {
 	bp := []byte(p)
 	bp, err := bcrypt.GenerateFromPassword(bp, bcrypt.DefaultCost)
 
 	return string(bp), err
-}
-
-// Generate a unique MD5 hash from the given `string`
-func MD5(e string) (string, error) {
-	bc, err := bcrypt.GenerateFromPassword([]byte(e), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-
-	h := md5.New()
-	h.Write(bc)
-
-	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
 func CreateUser(c *gin.Context) (*models.User, error) {
